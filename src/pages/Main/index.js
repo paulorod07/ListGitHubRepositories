@@ -1,5 +1,3 @@
-// add localStorage feature
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
@@ -13,20 +11,28 @@ export default function Main() {
     const [clearInput] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    /* useEffect(() => {
-        repositories(localStorage.getItem('repositories'));
+    useEffect(() => {
+        const localRepoItems = localStorage.getItem('repositories');
 
-        if (repositories) {
-            setRepositories(JSON.parse(repositories));
+        if (localRepoItems) {
+            setRepositories(JSON.parse(localRepoItems));
         }
-    }, [repositories]);
+    }, []);
 
-    useEffect((_, prevState) => {
-        if (prevState.repositories !== repositories) {
-            localStorage.setItem('repositories', JSON.stringify(repositories));
-        }
-    });
-    */
+    const usePrevious = value => {
+        const ref = React.useRef();
+        useEffect(() => {
+          ref.current = value;
+        });
+        return ref.current;
+      }
+
+      const prevRepositories = usePrevious(repositories);
+      useEffect(() => {
+          if (prevRepositories !== repositories) {
+              localStorage.setItem('repositories', JSON.stringify(repositories));
+          }
+        }, [repositories, prevRepositories]);
 
     function handleInputChange(e) {
         setNewRepo(e.target.value);
@@ -40,7 +46,6 @@ export default function Main() {
         const response = await api.get(`/repos/${newRepo}`);
 
         const data = {
-            // key property map <li>
             name: response.data.full_name,
         };
 
